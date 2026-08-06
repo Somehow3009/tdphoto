@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Đài Photo — Admin Dashboard</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --font-heading: 'Playfair Display', Georgia, serif;
+            --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            
+            --primary: #C9A96E;
+            --primary-dark: #A58249;
+            --primary-light: #DFCA9F;
+            --primary-glow: rgba(201, 169, 110, 0.25);
+            --primary-glow-strong: rgba(201, 169, 110, 0.5);
+            
+            --bg-main: #09090B;
+            --bg-alt: #121215;
+            --bg-card: #16161B;
+            --bg-glass: rgba(18, 18, 22, 0.85);
+            --text-main: #FFFFFF;
+            --text-muted: #A1A1AA;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(201, 169, 110, 0.3);
+            --shadow-main: rgba(0, 0, 0, 0.5);
+            
+            --success: #10B981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --danger: #EF4444;
+            --danger-glow: rgba(239, 68, 68, 0.2);
+            
+            --transition-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --transition-normal: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Login Container */
+        .login-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at top right, rgba(201, 169, 110, 0.08), transparent 40%),
+                        radial-gradient(circle at bottom left, rgba(201, 169, 110, 0.05), transparent 45%);
+            padding: 1.5rem;
+        }
+
+        .login-card {
+            background-color: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 30px var(--primary-glow);
+            text-align: center;
+            animation: fadeIn 0.6s var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary), var(--primary-light));
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+            margin: 0 auto 1.5rem;
+            object-fit: cover;
+        }
+
+        .login-title {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 2.25rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 1.75rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary-light);
+            margin-bottom: 0.6rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.9rem 1.2rem;
+            padding-right: 3rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color var(--transition-fast);
+            background: none;
+            border: none;
+            font-size: 1.05rem;
+        }
+
+        .toggle-password:hover {
+            color: var(--text-main);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            border: none;
+            border-radius: 10px;
+            padding: 0.95rem;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(201, 169, 110, 0.25);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+            margin-top: 0.5rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(201, 169, 110, 0.45);
+        }
+
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            animation: shake 0.4s ease;
+        }
+
+        /* Dashboard Container */
+        .dashboard-wrapper {
+            display: none; /* Shown after auth */
+            padding-bottom: 4rem;
+            animation: fadeIn 0.8s var(--transition-normal);
+        }
+
+        /* Header Styles */
+        .dash-header {
+            background-color: var(--bg-alt);
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(18, 18, 21, 0.9);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dash-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .dash-logo-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .dash-logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .dash-logo-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .dash-logo-subtitle {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.25em;
+            color: var(--primary);
+        }
+
+        .dash-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.65rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background-color: rgba(201, 169, 110, 0.04);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #FFA3A3;
+            padding: 0.65rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px var(--danger-glow);
+        }
+
+        /* Layout Grid */
+        .dash-body {
+            max-width: 1400px;
+            margin: 2rem auto 0;
+            padding: 0 2rem;
+        }
+
+        /* KPI Cards Row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-hover);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(201, 169, 110, 0.05);
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            width: 0;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            transition: width var(--transition-normal);
+        }
+
+        .kpi-card:hover::after {
+            width: 100%;
+        }
+
+        .kpi-data {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kpi-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        .kpi-change {
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .kpi-change.up {
+            color: var(--success);
+        }
+
+        .kpi-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            transition: all var(--transition-fast);
+        }
+
+        .kpi-card:hover .kpi-icon {
+            background-color: var(--primary-glow);
+            color: var(--primary-light);
+            border-color: rgba(201, 169, 110, 0.3);
+        }
+
+        /* Charts Section Grid */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dash-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-main);
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        .chart-container {
+            position: relative;
+            flex-grow: 1;
+            min-height: 320px;
+        }
+
+        /* Side Sub-Charts */
+        .sub-charts-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Logs & Activities Section */
+        .logs-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .activity-log-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        /* Scrollbar customization */
+        .activity-log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .activity-log-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        .activity-log-container::-webkit-scrollbar-thumb {
+            background: rgba(201, 169, 110, 0.2);
+            border-radius: 4px;
+        }
+
+        .activity-log-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        .log-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.9rem 1.2rem;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border);
+            margin-bottom: 0.75rem;
+            transition: all var(--transition-fast);
+        }
+
+        .log-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateX(4px);
+        }
+
+        .log-icon-wrap {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .log-icon-wrap.visit { background-color: rgba(59, 130, 246, 0.15); color: #60A5FA; }
+        .log-icon-wrap.new_visitor { background-color: rgba(16, 185, 129, 0.15); color: #34D399; }
+        .log-icon-wrap.pageview { background-color: rgba(107, 114, 128, 0.15); color: #9CA3AF; }
+        .log-icon-wrap.zalo_click { background-color: rgba(236, 72, 153, 0.15); color: #F472B6; }
+        .log-icon-wrap.pricing_click { background-color: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+        .log-icon-wrap.album_interaction { background-color: rgba(139, 92, 246, 0.15); color: #A78BFA; }
+
+        .log-details {
+            flex-grow: 1;
+        }
+
+        .log-text {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            margin-bottom: 0.2rem;
+        }
+
+        .log-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* Action Panel Footer */
+        .dash-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--border);
+            padding: 1.5rem 0 0;
+            margin-top: 1rem;
+        }
+
+        .footer-left {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Modals & Overlays */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 440px;
+            padding: 2.25rem 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px var(--primary-glow);
+            position: relative;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: color var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            color: var(--text-main);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pill.success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-pill.info {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #60A5FA;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SECTION 1: LOGIN INTERFACE -->
+    <div class="login-wrapper" id="loginWrapper">
+        <div class="login-card">
+            <img src="assets/images/logo.png" alt="Trang Đài Photo Logo" class="login-logo">
+            <h1 class="login-title">Trang Đài Photo</h1>
+            <p class="login-subtitle">Hệ Thống Quản Trị Website</p>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="adminPasscode">Mật mã quản trị viên</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="adminPasscode" class="form-control" placeholder="Nhập mã đăng nhập..." required autofocus>
+                        <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Xem mật mã">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">Đăng nhập hệ thống <i class="fa-solid fa-arrow-right-to-bracket" style="margin-left: 0.5rem;"></i></button>
+                
+                <div class="error-msg" id="loginError">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Mật mã không đúng, vui lòng thử lại!
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECTION 2: ADMIN DASHBOARD -->
+    <div class="dashboard-wrapper" id="dashboardWrapper">
+        <!-- Dashboard Navigation Header -->
+        <header class="dash-header">
+            <div class="header-content">
+                <div class="dash-logo-area">
+                    <img src="assets/images/logo.png" alt="Logo" class="dash-logo-img">
+                    <div class="dash-logo-text">
+                        <span class="dash-logo-title">Trang Đài Photo</span>
+                        <span class="dash-logo-subtitle">HỆ THỐNG BÁO CÁO</span>
+                    </div>
+                </div>
+                
+                <div class="dash-actions">
+                    <span class="status-pill success"><span style="width: 6px; height: 6px; background-color: currentColor; border-radius: 50%; display: inline-block;"></span> Đang hoạt động</span>
+                    <button class="btn-outline" id="changePasswordBtn"><i class="fa-solid fa-key"></i> Đổi mật mã</button>
+                    <button class="btn-danger" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Đăng xuất</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="dash-body">
+            <!-- Row of KPI Metrics -->
+            <div class="kpi-row">
+                <!-- KPI 1: Pageviews -->
+                <div class="kpi-card">
+                    <div class="kpi-data">
+                        <span class="kpi-title">Tổng Lượt Xem (Visits)</span>
+                        <span class="kpi-value" id="kpiVisits">0</span>
+                        <span class="kpi-change up"><i class="fa-solid fa-chart-line"></i> +12.4% hôm nay</span>
+                    </div>
+                    <div class="kpi-icon"><i class="fa-solid fa-eye"></i></div>
+                </div>
+
+                <!-- KPI 2: Unique Visitors -->
+                <div class="kpi-card">
+                    <div class="kpi-data">
+                        <span class="kpi-title">Khách Duy Nhất (Visitors)</span>
+                        <span class="kpi-value" id="kpiVisitors">0</span>
+                        <span class="kpi-change up"><i class="fa-solid fa-user-plus"></i> +8.2% tuần này</span>
+                    </div>
+                    <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+                </div>
+
+                <!-- KPI 3: Zalo Leads -->
+                <div class="kpi-card">
+                    <div class="kpi-data">
+                        <span class="kpi-title">Click Liên Hệ (Leads)</span>
+                        <span class="kpi-value" id="kpiZalo">0</span>
+                        <span class="kpi-change up"><i class="fa-solid fa-comment-dots"></i> Click Zalo & Điện thoại</span>
+                    </div>
+                    <div class="kpi-icon"><i class="fa-solid fa-paper-plane"></i></div>
+                </div>
+
+                <!-- KPI 4: Conversion Rate -->
+                <div class="kpi-card">
+                    <div class="kpi-data">
+                        <span class="kpi-title">Tỷ Lệ Đặt Hàng</span>
+                        <span class="kpi-value" id="kpiConvRate">0%</span>
+                        <span class="kpi-change up"><i class="fa-solid fa-percent"></i> Click Zalo / Lượt khách</span>
+                    </div>
+                    <div class="kpi-icon"><i class="fa-solid fa-bullseye"></i></div>
+                </div>
+            </div>
+
+            <!-- Row of Charts -->
+            <div class="charts-row">
+                <!-- Left: Traffic Chart -->
+                <div class="dash-card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa-solid fa-chart-area"></i> Lưu Lượng Truy Cập & Khách Truy Cập (15 Ngày)</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right Column: Sub-Charts (Stacked/List) -->
+                <div class="sub-charts-col">
+                    <!-- Zalo Click Locations -->
+                    <div class="dash-card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fa-solid fa-bullseye"></i> Nguồn Click Liên Hệ (Vị Trí)</h2>
+                        </div>
+                        <div class="chart-container" style="min-height: 200px;">
+                            <canvas id="locationChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Photo Sizes Interest -->
+                    <div class="dash-card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fa-solid fa-images"></i> Cỡ Ảnh Được Quan Tâm Nhất</h2>
+                        </div>
+                        <div class="chart-container" style="min-height: 200px;">
+                            <canvas id="sizeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row for Activity Feed & Settings -->
+            <div class="logs-row">
+                <div class="dash-card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa-solid fa-list-ul"></i> Nhật Ký Hoạt Động Thời Gian Thực</h2>
+                        <span class="status-pill info" id="activeDurationText"><i class="fa-solid fa-hourglass-half"></i> Đang tính toán...</span>
+                    </div>
+                    <div class="activity-log-container" id="activityLogs">
+                        <!-- Log items generated dynamically -->
+                    </div>
+
+                    <!-- Footer Options -->
+                    <div class="dash-footer">
+                        <div class="footer-left">
+                            <span>Dữ liệu được thu thập trên trình duyệt. Thời gian thực dựa trên localStorage.</span>
+                        </div>
+                        <div class="footer-actions">
+                            <button class="btn-outline" onclick="exportReportData()"><i class="fa-solid fa-download"></i> Xuất Báo Cáo (JSON)</button>
+                            <button class="btn-danger" onclick="resetMetricsData()"><i class="fa-solid fa-trash-can"></i> Xóa Dữ Liệu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CHANGE PASSWORD -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-key"></i> Đổi Mật Mã Admin</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                <div class="form-group">
+                    <label for="oldPassword">Mật mã hiện tại</label>
+                    <input type="password" id="oldPassword" class="form-control" placeholder="Nhập mật khẩu hiện tại..." required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Mật mã mới</label>
+                    <input type="password" id="newPassword" class="form-control" placeholder="Nhập mật khẩu mới..." required minlength="4">
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Xác nhận mật mã mới</label>
+                    <input type="password" id="confirmNewPassword" class="form-control" placeholder="Nhập lại mật khẩu mới..." required>
+                </div>
+                
+                <button type="submit" class="login-btn" style="margin-top: 1rem;">Xác Nhận Thay Đổi</button>
+                
+                <div class="error-msg" id="changePasswordError" style="justify-content: flex-start;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'tdphoto_dashboard_stats';
+        const DEFAULT_PASS_HASH = '2d891b7d384688a5c306f69802f82ff3889edf0b10a56b78c29cd49736f5e9f1'; // SHA-256 for 'trangdai123'
+        
+        let trafficChartInstance = null;
+        let locationChartInstance = null;
+        let sizeChartInstance = null;
+
+        // SHA-256 Utility function
+        async function sha256(str) {
+            const buf = new TextEncoder().encode(str);
+            const hash = await crypto.subtle.digest('SHA-256', buf);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Check Login status on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = sessionStorage.getItem('tdphoto_admin_logged_in') === 'true';
+            
+            // Password toggle icon event listener
+            const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+            const passwordInput = document.getElementById('adminPasscode');
+            
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePasswordBtn.querySelector('i').classList.toggle('fa-eye');
+                togglePasswordBtn.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+
+            // Modal events
+            const passwordModal = document.getElementById('passwordModal');
+            document.getElementById('changePasswordBtn').addEventListener('click', () => {
+                passwordModal.style.display = 'flex';
+                document.getElementById('oldPassword').focus();
+            });
+            document.getElementById('closeModalBtn').addEventListener('click', () => {
+                passwordModal.style.display = 'none';
+                document.getElementById('changePasswordForm').reset();
+                document.getElementById('changePasswordError').style.display = 'none';
+            });
+            
+            // Close modal when clicking background overlay
+            passwordModal.addEventListener('click', (e) => {
+                if (e.target === passwordModal) {
+                    passwordModal.style.display = 'none';
+                    document.getElementById('changePasswordForm').reset();
+                    document.getElementById('changePasswordError').style.display = 'none';
+                }
+            });
+
+            if (isLoggedIn) {
+                showDashboard();
+            }
+        });
+
+        // 1. AUTHENTICATION HANDLERS
+        async function handleLogin(e) {
+            e.preventDefault();
+            const passcode = document.getElementById('adminPasscode').value;
+            const errorEl = document.getElementById('loginError');
+            
+            // Get correct passcode hash (stored or default)
+            const correctHash = localStorage.getItem('tdphoto_admin_hash') || DEFAULT_PASS_HASH;
+            const inputHash = await sha256(passcode);
+
+            if (inputHash === correctHash) {
+                sessionStorage.setItem('tdphoto_admin_logged_in', 'true');
+                errorEl.style.display = 'none';
+                showDashboard();
+            } else {
+                errorEl.style.display = 'flex';
+                document.getElementById('adminPasscode').value = '';
+                document.getElementById('adminPasscode').focus();
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('tdphoto_admin_logged_in');
+            document.getElementById('dashboardWrapper').style.display = 'none';
+            document.getElementById('loginWrapper').style.display = 'flex';
+            document.getElementById('adminPasscode').value = '';
+            document.getElementById('adminPasscode').focus();
+        }
+
+        // 2. PASSWORD UTILITIES
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+            const errorEl = document.getElementById('changePasswordError');
+            
+            const correctHash = localStorage.getItem('tdphoto_admin_hash') || DEFAULT_PASS_HASH;
+            const oldHash = await sha256(oldPassword);
+
+            if (oldHash !== correctHash) {
+                errorEl.innerText = "Mật khẩu cũ không chính xác!";
+                errorEl.style.color = 'var(--danger)';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                errorEl.innerText = "Mật khẩu mới nhập lại không khớp!";
+                errorEl.style.color = 'var(--danger)';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            // Save new hash
+            const newHash = await sha256(newPassword);
+            localStorage.setItem('tdphoto_admin_hash', newHash);
+            
+            // Show Success
+            errorEl.innerText = "Đổi mật khẩu thành công!";
+            errorEl.style.color = 'var(--success)';
+            errorEl.style.display = 'flex';
+
+            setTimeout(() => {
+                document.getElementById('passwordModal').style.display = 'none';
+                document.getElementById('changePasswordForm').reset();
+                errorEl.style.display = 'none';
+            }, 1500);
+        }
+
+        // 3. RENDER DASHBOARD
+        function showDashboard() {
+            document.getElementById('loginWrapper').style.display = 'none';
+            document.getElementById('dashboardWrapper').style.display = 'block';
+            
+            renderStatsData();
+            
+            // Set up live refresh timer (every 10 seconds)
+            setInterval(() => {
+                if (sessionStorage.getItem('tdphoto_admin_logged_in') === 'true') {
+                    renderStatsData(true); // Soft refresh, don't recreate chart objects, just update data
+                }
+            }, 10000);
+        }
+
+        function getStatsData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            return JSON.parse(raw);
+        }
+
+        function renderStatsData(isUpdate = false) {
+            const stats = getStatsData();
+            if (!stats) return;
+
+            // Render KPI indicators
+            document.getElementById('kpiVisits').innerText = stats.visits.toLocaleString();
+            document.getElementById('kpiVisitors').innerText = stats.visitors.toLocaleString();
+            document.getElementById('kpiZalo').innerText = stats.zalo_clicks.total.toLocaleString();
+            
+            const rate = stats.visitors > 0 ? ((stats.zalo_clicks.total / stats.visitors) * 100).toFixed(1) : '0';
+            document.getElementById('kpiConvRate').innerText = rate + '%';
+
+            // Active Duration human-readable display
+            const durationSec = stats.total_duration_sec || 0;
+            const durationMin = Math.round(durationSec / 60);
+            let durationText = `${durationSec} giây`;
+            if (durationMin >= 60) {
+                const hours = Math.floor(durationMin / 60);
+                const mins = durationMin % 60;
+                durationText = `${hours}h ${mins}m tương tác`;
+            } else if (durationSec >= 60) {
+                durationText = `${durationMin} phút tương tác`;
+            }
+            document.getElementById('activeDurationText').innerHTML = `<i class="fa-solid fa-hourglass-half"></i> ${durationText}`;
+
+            // Render Charts
+            renderCharts(stats, isUpdate);
+
+            // Render Activity logs
+            renderActivityLogs(stats.events);
+        }
+
+        function renderCharts(stats, isUpdate) {
+            // Data extraction for Traffic Chart
+            const dates = stats.daily_history.map(d => {
+                // Shorten date from YYYY-MM-DD to DD/MM
+                const parts = d.date.split('-');
+                return parts.length === 3 ? `${parts[2]}/${parts[1]}` : d.date;
+            });
+            const visitsData = stats.daily_history.map(d => d.visits || 0);
+            const visitorsData = stats.daily_history.map(d => d.visitors || 0);
+
+            // Chart Colors
+            const goldColor = '#C9A96E';
+            const goldLightColor = '#DFCA9F';
+            const blueColor = '#3B82F6';
+
+            // 1. TRAFFIC LINE CHART
+            if (isUpdate && trafficChartInstance) {
+                trafficChartInstance.data.labels = dates;
+                trafficChartInstance.data.datasets[0].data = visitsData;
+                trafficChartInstance.data.datasets[1].data = visitorsData;
+                trafficChartInstance.update('none'); // silent update
+            } else {
+                if (trafficChartInstance) trafficChartInstance.destroy();
+                
+                const ctx1 = document.getElementById('trafficChart').getContext('2d');
+                trafficChartInstance = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [
+                            {
+                                label: 'Tổng Lượt Xem (Visits)',
+                                data: visitsData,
+                                borderColor: goldColor,
+                                backgroundColor: 'rgba(201, 169, 110, 0.05)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 4,
+                                pointBackgroundColor: goldColor,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Lượt Khách Duy Nhất (Visitors)',
+                                data: visitorsData,
+                                borderColor: blueColor,
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.35,
+                                borderDash: [5, 5],
+                                pointRadius: 3,
+                                pointBackgroundColor: blueColor,
+                                pointHoverRadius: 5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#E4E4E7', font: { family: 'Plus Jakarta Sans', weight: '600' } },
+                                position: 'top'
+                            },
+                            tooltip: { padding: 12, cornerRadius: 8 }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                                ticks: { color: '#A1A1AA' }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                                ticks: { color: '#A1A1AA' },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. LOCATION BAR CHART (HORIZONTAL)
+            const locLabels = Object.keys(stats.zalo_clicks.locations);
+            const locValues = Object.values(stats.zalo_clicks.locations);
+
+            if (isUpdate && locationChartInstance) {
+                locationChartInstance.data.labels = locLabels;
+                locationChartInstance.data.datasets[0].data = locValues;
+                locationChartInstance.update('none');
+            } else {
+                if (locationChartInstance) locationChartInstance.destroy();
+
+                const ctx2 = document.getElementById('locationChart').getContext('2d');
+                locationChartInstance = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: locLabels,
+                        datasets: [{
+                            label: 'Lượt Clicks',
+                            data: locValues,
+                            backgroundColor: [
+                                'rgba(201, 169, 110, 0.85)',
+                                'rgba(59, 130, 246, 0.85)',
+                                'rgba(16, 185, 129, 0.85)',
+                                'rgba(236, 72, 153, 0.85)',
+                                'rgba(245, 158, 11, 0.85)',
+                                'rgba(107, 114, 128, 0.85)'
+                            ],
+                            borderWidth: 0,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { padding: 10, cornerRadius: 6 }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#A1A1AA', precision: 0 },
+                                beginAtZero: true
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: '#E4E4E7', font: { weight: '600' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. PHOTO SIZE INTEREST (DOUGHNUT CHART)
+            const sizeLabels = Object.keys(stats.pricing_clicks.sizes);
+            const sizeValues = Object.values(stats.pricing_clicks.sizes);
+
+            if (isUpdate && sizeChartInstance) {
+                sizeChartInstance.data.labels = sizeLabels;
+                sizeChartInstance.data.datasets[0].data = sizeValues;
+                sizeChartInstance.update('none');
+            } else {
+                if (sizeChartInstance) sizeChartInstance.destroy();
+
+                const ctx3 = document.getElementById('sizeChart').getContext('2d');
+                sizeChartInstance = new Chart(ctx3, {
+                    type: 'doughnut',
+                    data: {
+                        labels: sizeLabels,
+                        datasets: [{
+                            data: sizeValues,
+                            backgroundColor: [
+                                '#C9A96E',
+                                '#4B5563',
+                                '#10B981',
+                                '#EF4444',
+                                '#8B5CF6'
+                            ],
+                            borderWidth: 1,
+                            borderColor: '#16161B'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#A1A1AA', boxWidth: 12, font: { family: 'Plus Jakarta Sans', size: 11 } },
+                                position: 'right'
+                            },
+                            tooltip: { padding: 10, cornerRadius: 6 }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+        }
+
+        function renderActivityLogs(events) {
+            const logsContainer = document.getElementById('activityLogs');
+            
+            if (!events || events.length === 0) {
+                logsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                        <i class="fa-solid fa-receipt" style="font-size: 2rem; margin-bottom: 0.8rem; display: block; color: rgba(255,255,255,0.06);"></i>
+                        Chưa có hoạt động nào được ghi nhận hôm nay.
+                    </div>`;
+                return;
+            }
+
+            const itemsHTML = events.map(event => {
+                let iconClass = 'fa-solid fa-fingerprint';
+                
+                if (event.type === 'visit') iconClass = 'fa-solid fa-right-to-bracket';
+                else if (event.type === 'new_visitor') iconClass = 'fa-solid fa-user-plus';
+                else if (event.type === 'pageview') iconClass = 'fa-solid fa-eye';
+                else if (event.type === 'zalo_click') iconClass = 'fa-solid fa-paper-plane';
+                else if (event.type === 'pricing_click') iconClass = 'fa-solid fa-tag';
+                else if (event.type === 'album_interaction') iconClass = 'fa-solid fa-book-open';
+
+                // Format Time as HH:MM:SS
+                const dateObj = new Date(event.timestamp);
+                const timeStr = dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const dateStr = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+
+                return `
+                    <div class="log-item">
+                        <div class="log-icon-wrap ${event.type}">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="log-details">
+                            <p class="log-text">${escapeHTML(event.detail)}</p>
+                            <span class="log-time">
+                                <i class="fa-solid fa-clock"></i> ${timeStr} ngày ${dateStr}
+                            </span>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            logsContainer.innerHTML = itemsHTML;
+        }
+
+        // HTML safety escaping utility
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        // 4. ACTION UTILITIES (EXPORT / RESET)
+        function exportReportData() {
+            const stats = getStatsData();
+            if (!stats) return;
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(stats, null, 2));
+            const downloadAnchor = document.createElement('a');
+            
+            // Format file name with today's date
+            const today = new Date().toISOString().split('T')[0];
+            
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `trangdai_photo_report_${today}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function resetMetricsData() {
+            const confirmReset = confirm("Bạn có chắc chắn muốn xóa toàn bộ chỉ số báo cáo? Thao tác này sẽ đặt lại tất cả chỉ số về 0 và làm sạch nhật ký hoạt động (lưu ý: lịch sử 15 ngày cũng sẽ được khởi tạo lại).");
+            
+            if (confirmReset) {
+                localStorage.removeItem(STORAGE_KEY);
+                renderStatsData();
+                alert("Đã xóa sạch dữ liệu báo cáo thành công!");
+            }
+        }
+    </script>
+</body>
+</html>
